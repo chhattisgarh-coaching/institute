@@ -954,6 +954,52 @@
                 background-color: white !important;
                 color: var(--text-color) !important;
             }
+
+             * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            color-scheme: light;
+            --primary-color: #1a365d;
+            --secondary-color: #e63946;
+            --accent-color: #f8b229;
+            --light-color: #f8f9fa;
+            --dark-color: #333333;
+            --text-color: #444444;
+            --shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: #ffffff;
+            overflow-x: hidden;
+        }
+
+        /* Your existing styles continue... */
+        /* ... */
+
+        /* Make sure chatbot doesn't interfere */
+        .chatbot-iframe {
+            position: fixed;
+            bottom: 0;
+            right: 0;
+            border: none;
+            z-index: 10000;
+            pointer-events: none;
+            width: 400px;
+            height: 600px;
+        }
+
+        .chatbot-iframe.active {
+            pointer-events: auto;
+        }
+
         }
     </style>
 </head>
@@ -1317,10 +1363,11 @@
             </div>
             
             <div class="footer-bottom">
-                <p>&copy; 2023 Chhattisgarh Coaching Centre. All Rights Reserved. | Designed for Educational Excellence</p>
+                <p>&copy; 2025 Chhattisgarh Coaching Centre. All Rights Reserved. | Designed for Educational Excellence</p>
             </div>
         </div>
     </footer>
+
 
     <script>
         // Mobile Navigation Toggle
@@ -1487,15 +1534,477 @@
             };
         }
         
-        // Function to update logo source
-        function updateLogoSource(newLogoSrc) {
-            if (mainLogo) {
-                mainLogo.src = newLogoSrc;
-                if (footerLogo) {
-                    footerLogo.src = newLogoSrc;
+    </script>
+
+<!-- Enhanced Chatbot - No Input, Button-Based Only -->
+<div id="chatbotContainer" style="position: fixed; bottom: 20px; right: 20px; z-index: 9999;">
+    <div id="chatbotToggle" style="width: 70px; height: 70px; background: linear-gradient(135deg, #1a365d, #2c5282); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 5px 20px rgba(0,0,0,0.3); transition: all 0.3s ease; border: 3px solid white; animation: pulse 2s infinite;">
+        <i class="fas fa-robot" style="font-size: 28px; color: white;"></i>
+        <div id="notificationBadge" style="position: absolute; top: -5px; right: -5px; background: #e63946; color: white; font-size: 12px; width: 25px; height: 25px; border-radius: 50%; display: none; align-items: center; justify-content: center; font-weight: bold; animation: badgePulse 2s infinite;">!</div>
+    </div>
+    
+    <div id="chatbotWindow" style="position: absolute; bottom: 90px; right: 0; width: 350px; height: 500px; background: white; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); display: none; flex-direction: column; overflow: hidden; z-index: 10000; animation: slideUp 0.3s ease;">
+        <!-- Chatbot Header -->
+        <div style="background: linear-gradient(135deg, #1a365d, #2c5282); color: white; padding: 20px; border-radius: 20px 20px 0 0;">
+            <div style="display: flex; align-items: center; justify-content: space-between;">
+                <div style="display: flex; align-items: center; gap: 15px;">
+                    <div style="width: 45px; height: 45px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; color: #1a365d; box-shadow: 0 3px 10px rgba(0,0,0,0.1);">
+                        <i class="fas fa-graduation-cap"></i>
+                    </div>
+                    <div>
+                        <h3 style="margin: 0; font-size: 16px; font-weight: 600;">CCC Assistant</h3>
+                        <p style="margin: 0; font-size: 12px; opacity: 0.9;">Ask me anything!</p>
+                    </div>
+                </div>
+                <button id="chatbotClose" style="background: rgba(255,255,255,0.2); border: none; width: 35px; height: 35px; border-radius: 50%; color: white; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; justify-content: center;">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Chat Messages Area -->
+        <div id="chatbotMessages" style="flex: 1; padding: 20px; overflow-y: auto; background: #f8f9fa; display: flex; flex-direction: column; gap: 15px;">
+            <!-- Initial Bot Message -->
+            <div class="bot-message" style="max-width: 85%; padding: 12px 16px; background: white; border-radius: 18px; border-bottom-left-radius: 5px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); align-self: flex-start; border: 1px solid #eaeaea; animation: fadeIn 0.5s ease;">
+                <div style="font-size: 14px; line-height: 1.4;">
+                    <strong>Hello! 👋</strong><br>
+                    I'm your assistant from <strong>Chhattisgarh Coaching Centre</strong>. I can help you with:
+                </div>
+                <div style="font-size: 11px; color: #777; margin-top: 8px; text-align: right;" id="currentTime"></div>
+                
+                <!-- Quick Action Buttons -->
+                <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;">
+                    <button class="quickBtn" data-type="courses" style="background: #f0f4f8; border: 1px solid #d1d9e6; border-radius: 15px; padding: 8px 12px; font-size: 12px; cursor: pointer; color: #1a365d; transition: all 0.3s ease; display: flex; align-items: center; gap: 5px; flex: 1;">
+                        <span>📚</span> Courses
+                    </button>
+                    <button class="quickBtn" data-type="fees" style="background: #f0f4f8; border: 1px solid #d1d9e6; border-radius: 15px; padding: 8px 12px; font-size: 12px; cursor: pointer; color: #1a365d; transition: all 0.3s ease; display: flex; align-items: center; gap: 5px; flex: 1;">
+                        <span>💰</span> Fees
+                    </button>
+                    <button class="quickBtn" data-type="location" style="background: #f0f4f8; border: 1px solid #d1d9e6; border-radius: 15px; padding: 8px 12px; font-size: 12px; cursor: pointer; color: #1a365d; transition: all 0.3s ease; display: flex; align-items: center; gap: 5px; flex: 1;">
+                        <span>📍</span> Location
+                    </button>
+                    <button class="quickBtn" data-type="admission" style="background: #f0f4f8; border: 1px solid #d1d9e6; border-radius: 15px; padding: 8px 12px; font-size: 12px; cursor: pointer; color: #1a365d; transition: all 0.3s ease; display: flex; align-items: center; gap: 5px; flex: 1;">
+                        <span>🎓</span> Admission
+                    </button>
+                    <button class="quickBtn" data-type="contact" style="background: #f0f4f8; border: 1px solid #d1d9e6; border-radius: 15px; padding: 8px 12px; font-size: 12px; cursor: pointer; color: #1a365d; transition: all 0.3s ease; display: flex; align-items: center; gap: 5px; flex: 1;">
+                        <span>📞</span> Contact
+                    </button>
+                    <button class="quickBtn" data-type="timings" style="background: #f0f4f8; border: 1px solid #d1d9e6; border-radius: 15px; padding: 8px 12px; font-size: 12px; cursor: pointer; color: #1a365d; transition: all 0.3s ease; display: flex; align-items: center; gap: 5px; flex: 1;">
+                        <span>⏰</span> Timings
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Chatbot Footer -->
+        <div style="padding: 15px 20px; background: #f8f9fa; border-top: 1px solid #eaeaea; text-align: center;">
+            <p style="margin: 0; font-size: 11px; color: #777;">
+                <i class="fas fa-info-circle"></i> Select any option above for instant information
+            </p>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Animations */
+    @keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+        100% { transform: scale(1); }
+    }
+    
+    @keyframes badgePulse {
+        0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(230, 57, 70, 0.7); }
+        70% { transform: scale(1.1); box-shadow: 0 0 0 10px rgba(230, 57, 70, 0); }
+        100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(230, 57, 70, 0); }
+    }
+    
+    @keyframes slideUp {
+        from { transform: translateY(20px); opacity: 0; }
+        to { transform: translateY(0); opacity: 1; }
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    /* Hover effects */
+    #chatbotToggle:hover {
+        transform: scale(1.1) rotate(5deg);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+    }
+    
+    #chatbotClose:hover {
+        background: rgba(255,255,255,0.3) !important;
+        transform: rotate(90deg);
+    }
+    
+    .quickBtn:hover {
+        background: #1a365d !important;
+        color: white !important;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    
+    /* Responsive design */
+    @media (max-width: 768px) {
+        #chatbotContainer {
+            bottom: 15px;
+            right: 15px;
+        }
+        
+        #chatbotWindow {
+            width: calc(100vw - 40px);
+            right: -10px;
+            height: 70vh;
+        }
+        
+        #chatbotToggle {
+            width: 60px;
+            height: 60px;
+        }
+        
+        #chatbotToggle i {
+            font-size: 24px;
+        }
+    }
+    
+    @media (max-width: 480px) {
+        #chatbotContainer {
+            bottom: 10px;
+            right: 10px;
+        }
+        
+        #chatbotWindow {
+            width: calc(100vw - 30px);
+            height: 65vh;
+        }
+        
+        #chatbotToggle {
+            width: 55px;
+            height: 55px;
+        }
+    }
+</style>
+
+<script>
+    // Chatbot Logic
+    document.addEventListener('DOMContentLoaded', function() {
+        const toggle = document.getElementById('chatbotToggle');
+        const chatbotWindow = document.getElementById('chatbotWindow');
+        const closeBtn = document.getElementById('chatbotClose');
+        const messagesContainer = document.getElementById('chatbotMessages');
+        const badge = document.getElementById('notificationBadge');
+        const currentTimeElement = document.getElementById('currentTime');
+        
+        // Set current time
+        const now = new Date();
+        const timeString = now.getHours().toString().padStart(2, '0') + ':' + 
+                          now.getMinutes().toString().padStart(2, '0');
+        if (currentTimeElement) {
+            currentTimeElement.textContent = timeString;
+        }
+        
+        // Toggle chatbot window
+        toggle.addEventListener('click', function() {
+            if (chatbotWindow.style.display === 'flex') {
+                chatbotWindow.style.display = 'none';
+            } else {
+                chatbotWindow.style.display = 'flex';
+                badge.style.display = 'none';
+            }
+        });
+        
+        // Close chatbot
+        closeBtn.addEventListener('click', function() {
+            chatbotWindow.style.display = 'none';
+        });
+        
+        // Predefined responses
+        const responses = {
+            courses: {
+                title: "📚 Our Courses",
+                message: `
+                    <strong>Chhattisgarh Coaching Centre offers:</strong><br><br>
+                    
+                    <strong>1. 11th & 12th PCM</strong><br>
+                    • Physics, Chemistry, Mathematics<br>
+                    • JEE/Board preparation<br>
+                    • Comprehensive study material<br><br>
+                    
+                    <strong>2. 11th & 12th PCB</strong><br>
+                    • Physics, Chemistry, Biology<br>
+                    • NEET/Board preparation<br>
+                    • Expert biology faculty<br><br>
+                    
+                    <strong>3. School Curriculum (1st-12th)</strong><br>
+                    • All subjects covered<br>
+                    • CBSE, ICSE & State Board<br>
+                    • Regular assessments & tests
+                `,
+                buttons: ['fees', 'admission', 'contact']
+            },
+            
+            fees: {
+                title: "💰 Fee Structure",
+                message: `
+                    <strong>Our Competitive Fee Structure:</strong><br><br>
+                    
+                    <strong>For 11th & 12th Students:</strong><br>
+                    • PCM/PCB: ₹25,000 - ₹35,000 per year<br>
+                    • Includes study material & test series<br>
+                    • Installment plans available<br><br>
+                    
+                    <strong>For School Curriculum:</strong><br>
+                    • Classes 1-10: ₹8,000 - ₹15,000 per subject/year<br>
+                    • Classes 11-12: ₹10,000 - ₹20,000 per subject/year<br>
+                    • Discount for multiple subjects<br><br>
+                    
+                    <strong>Special Offers:</strong><br>
+                    • Scholarships for meritorious students<br>
+                    • Sibling discount available<br>
+                    • Early bird discount (if applicable)
+                `,
+                buttons: ['courses', 'admission']
+            },
+            
+            location: {
+                title: "📍 Our Location",
+                message: `
+                    <strong>Chhattisgarh Coaching Centre</strong><br><br>
+                    
+                    <strong>Address:</strong><br>
+                    Sai Ssimran City, Raipur, Mathpurena,<br>
+                    Chhattisgarh 492013, India<br><br>
+                    
+                    <strong>Landmark:</strong><br>
+                    Near Mathpurena Chowk, Raipur<br><br>
+                    
+                    <strong>Google Maps:</strong><br>
+                    <a href="https://maps.app.goo.gl/UhPRbhTiFqNkzCFe9" target="_blank" style="color: #1a365d; text-decoration: none; font-weight: bold;">
+                        📍 Click here for directions
+                    </a>
+                `,
+                buttons: ['contact', 'timings']
+            },
+            
+            admission: {
+                title: "🎓 Admission Process",
+                message: `
+                    <strong>For admission inquiries, please contact us directly:</strong><br><br>
+                    
+                    <strong>📞 Call Us:</strong><br>
+                    <a href="tel:+919131860077" style="color: #1a365d; text-decoration: none; font-weight: bold;">
+                        +91 91318 60077
+                    </a><br><br>
+                    
+                    <strong>📧 Email Us:</strong><br>
+                    admissions@chhattisgarhcoaching.com<br><br>
+                    
+                    <strong>📍 Visit Our Campus:</strong><br>
+                    Sai Ssimran City, Raipur<br>
+                    (Timings: 8 AM - 8 PM)<br><br>
+                    
+                    <strong>Required Documents:</strong><br>
+                    • Previous year mark sheet<br>
+                    • School ID proof<br>
+                    • 2 passport size photos
+                `,
+                buttons: ['contact', 'fees', 'courses']
+            },
+            
+            contact: {
+                title: "📞 Contact Information",
+                message: `
+                    <strong>Get in touch with us:</strong><br><br>
+                    
+                    <strong>Phone Numbers:</strong><br>
+                    📱 <a href="tel:+919131860077" style="color: #1a365d; text-decoration: none; font-weight: bold;">
+                        +91 91318 60077
+                    </a><br>
+                    📱 <a href="tel:+919131860077" style="color: #1a365d; text-decoration: none; font-weight: bold;">
+                        +91 91318 60077
+                    </a><br><br>
+                    
+                    <strong>Email Address:</strong><br>
+                    ✉️ info@chhattisgarhcoaching.com<br>
+                    ✉️ admissions@chhattisgarhcoaching.com<br><br>
+                    
+                    <strong>Location:</strong><br>
+                    📍 Sai Ssimran City, Raipur, Mathpurena,<br>
+                    Chhattisgarh 492013
+                `,
+                buttons: ['location', 'timings', 'courses']
+            },
+            
+            timings: {
+                title: "⏰ Working Hours",
+                message: `
+                    <strong>Our Operating Hours:</strong><br><br>
+                    
+                    <strong>Monday - Saturday:</strong><br>
+                    • 8:00 AM - 8:00 PM<br>
+                    • Classes run in multiple batches<br><br>
+                    
+                    <strong>Sunday:</strong><br>
+                    • 10:00 AM - 4:00 PM<br>
+                    • (Office hours only)<br><br>
+                    
+                    <strong>Batch Timings:</strong><br>
+                    • Morning: 7 AM - 11 AM<br>
+                    • Afternoon: 12 PM - 4 PM<br>
+                    • Evening: 4 PM - 8 PM<br><br>
+                    
+                    <strong>Office Timings:</strong><br>
+                    • 9:00 AM - 7:00 PM (All days)
+                `,
+                buttons: ['contact', 'location']
+            }
+        };
+        
+        // Function to create bot message
+        function createBotMessage(type) {
+            const response = responses[type];
+            if (!response) return;
+            
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'bot-message';
+            messageDiv.style.cssText = 'max-width: 85%; padding: 12px 16px; background: white; border-radius: 18px; border-bottom-left-radius: 5px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); align-self: flex-start; border: 1px solid #eaeaea; animation: fadeIn 0.5s ease; margin-top: 10px;';
+            
+            const now = new Date();
+            const timeString = now.getHours().toString().padStart(2, '0') + ':' + 
+                              now.getMinutes().toString().padStart(2, '0');
+            
+            let buttonsHTML = '';
+            if (response.buttons && response.buttons.length > 0) {
+                buttonsHTML = `<div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;">`;
+                response.buttons.forEach(btnType => {
+                    const btnInfo = responses[btnType];
+                    if (btnInfo) {
+                        const iconMap = {
+                            courses: '📚', fees: '💰', location: '📍',
+                            admission: '🎓', contact: '📞', timings: '⏰'
+                        };
+                        buttonsHTML += `
+                            <button class="quickBtn" data-type="${btnType}" style="background: #f0f4f8; border: 1px solid #d1d9e6; border-radius: 15px; padding: 8px 12px; font-size: 12px; cursor: pointer; color: #1a365d; transition: all 0.3s ease; display: flex; align-items: center; gap: 5px;">
+                                <span>${iconMap[btnType] || '📌'}</span> ${btnInfo.title.replace(/[📚💰📍🎓📞⏰]/g, '').trim()}
+                            </button>
+                        `;
+                    }
+                });
+                buttonsHTML += `</div>`;
+            }
+            
+            messageDiv.innerHTML = `
+                <div style="font-size: 14px; line-height: 1.5;">
+                    <strong style="color: #1a365d; display: block; margin-bottom: 8px; font-size: 15px;">
+                        ${response.title}
+                    </strong>
+                    <div style="color: #444;">
+                        ${response.message}
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: #777; margin-top: 10px; text-align: right;">
+                    ${timeString}
+                </div>
+                ${buttonsHTML}
+            `;
+            
+            return messageDiv;
+        }
+        
+        // Function to create user selection message
+        function createUserMessage(type) {
+            const response = responses[type];
+            if (!response) return;
+            
+            const messageDiv = document.createElement('div');
+            messageDiv.style.cssText = 'max-width: 85%; padding: 12px 16px; background: linear-gradient(135deg, #1a365d, #2c5282); color: white; border-radius: 18px; border-bottom-right-radius: 5px; align-self: flex-end; margin-left: auto; animation: fadeIn 0.5s ease; margin-top: 10px;';
+            
+            const now = new Date();
+            const timeString = now.getHours().toString().padStart(2, '0') + ':' + 
+                              now.getMinutes().toString().padStart(2, '0');
+            
+            const iconMap = {
+                courses: '📚', fees: '💰', location: '📍',
+                admission: '🎓', contact: '📞', timings: '⏰'
+            };
+            
+            messageDiv.innerHTML = `
+                <div style="font-size: 14px; line-height: 1.4;">
+                    ${iconMap[type] || '💬'} ${response.title.replace(/[📚💰📍🎓📞⏰]/g, '').trim()}
+                </div>
+                <div style="font-size: 11px; color: rgba(255,255,255,0.8); margin-top: 5px; text-align: right;">
+                    ${timeString}
+                </div>
+            `;
+            
+            return messageDiv;
+        }
+        
+        // Handle quick button clicks
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('quickBtn') || 
+                e.target.closest('.quickBtn')) {
+                const btn = e.target.classList.contains('quickBtn') ? 
+                           e.target : e.target.closest('.quickBtn');
+                const type = btn.getAttribute('data-type');
+                
+                if (type && responses[type]) {
+                    // Add user message
+                    const userMsg = createUserMessage(type);
+                    if (userMsg) {
+                        messagesContainer.appendChild(userMsg);
+                    }
+                    
+                    // Add bot response after delay
+                    setTimeout(() => {
+                        const botMsg = createBotMessage(type);
+                        if (botMsg) {
+                            messagesContainer.appendChild(botMsg);
+                            // Scroll to bottom
+                            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                        }
+                    }, 500);
+                    
+                    // Scroll to bottom
+                    setTimeout(() => {
+                        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                    }, 100);
                 }
             }
-        }
-    </script>
+        });
+        
+        // Show notification badge after 3 seconds
+        setTimeout(() => {
+            badge.style.display = 'flex';
+        }, 3000);
+        
+        // Auto-hide notification when chatbot is opened
+        const observer = new MutationObserver(function(mutations) {
+            mutations.forEach(function(mutation) {
+                if (mutation.type === 'attributes' && 
+                    mutation.attributeName === 'style') {
+                    if (chatbotWindow.style.display === 'flex') {
+                        badge.style.display = 'none';
+                    }
+                }
+            });
+        });
+        
+        observer.observe(chatbotWindow, { attributes: true });
+        
+        // Close chatbot when clicking outside (optional)
+        document.addEventListener('click', function(e) {
+            if (chatbotWindow.style.display === 'flex' && 
+                !chatbotWindow.contains(e.target) && 
+                !toggle.contains(e.target)) {
+                chatbotWindow.style.display = 'none';
+            }
+        });
+    });
+</script>
+
 </body>
 </html>
